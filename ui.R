@@ -44,6 +44,13 @@ ui <- dashboardPage(skin = "black",
                choices = c("Age", "PainScale", "FatigueScale", "PatientGlobal", "MDGlobal", "MdhaqScore", "BMI"), selected = "Age"
              ),
              
+             # add a filter 
+             sliderInput(inputId = "filter",
+                         label = "Filter the Values",
+                         min = 1,
+                         max = 5,
+                         value = c(1,5)),
+             
              #numeric summary
              radioButtons(
                "RB1",
@@ -56,9 +63,31 @@ ui <- dashboardPage(skin = "black",
              menuSubItem("Summary Table", tabName = "Summary",icon = icon("play", lib = "glyphicon")),
              
              #plots
-             sliderInput(inputId = "Bin", "Bin Number on the Histogram",
-                         min = 10, max = 30, value = 21, step = 1),
-             menuSubItem("Histogram", tabName = "Plot",icon = icon("play", lib = "glyphicon")),
+             radioButtons(
+               "RB2",
+               label="Type of Plot",
+               choices = list(
+                 "Histogram",
+                 "Density")
+             ),
+             
+             conditionalPanel(condition = "input.RB2 == 'Histogram'",
+                              sliderInput(inputId = "Bin", "Bin Number on the Histogram",
+                         min = 10, max = 30, value = 20, step = 1)),
+             
+             conditionalPanel(condition = "input.RB2 == 'Density'",
+                              sliderInput(inputId = "Adjust", "Adjust Value for the Density Plot",
+                                          min = 0.1, max = 1, value = 0.5, step = 0.1)),
+             
+             radioButtons(
+               "RB3",
+               label="Plot Postion",
+               choices = list(
+                 "stack",
+                 "dodge")
+             ),
+             
+             menuSubItem("Distribution", tabName = "Plot",icon = icon("play", lib = "glyphicon")),
              
              #categorical summary
              selectizeInput(
@@ -75,7 +104,17 @@ ui <- dashboardPage(skin = "black",
              h5("Variable Distribution in Each Group"),
              h5("of the Selected Categorical Variable"),
              
-             menuSubItem("Box Chart", tabName = "boxPlot",icon = icon("play", lib = "glyphicon"))
+             menuSubItem("Box Chart", tabName = "boxPlot",icon = icon("play", lib = "glyphicon")),
+             
+             #correlation
+             selectizeInput(
+               inputId ="select3",
+               "Select A Second Numeric Variable and Investigate the Correlation With the Previous Selected one Across Remission Groups",
+               choices = c("Age", "PainScale", "FatigueScale", "PatientGlobal", "MDGlobal", "MdhaqScore", "BMI"), selected = "PainScale"
+             ),
+             
+             menuSubItem("Scatter Plot", tabName = "scatterPlot",icon = icon("play", lib = "glyphicon"))
+          
             )
     
     
@@ -106,30 +145,37 @@ ui <- dashboardPage(skin = "black",
       tabItem(tabName = "Summary",
               h2("Summary Table of Numeric Variable"),
               fluidRow(
-                       box(width = 5,  
+                       box(width = 5,
                        solidHeader = TRUE, collapsible = FALSE,
                        tableOutput("table")))),
       
       tabItem(tabName = "Plot",
-              h2("Histogram Plot for Numeric Variable"),
+              h2("Distribution Plot for Numeric Variable"),
               fluidRow(
-                box(width = 8,  
+                box(width = 8, 
                     solidHeader = TRUE, collapsible = FALSE,
                     plotOutput("dataPlot")))),
       
       tabItem(tabName = "barPlot",
               h2("Bar Chart for Categorical Variable"),
               fluidRow(
-                box(width = 8,  
+                box(width = 8,
                     solidHeader = TRUE, collapsible = FALSE,
                     plotOutput("dataPlot1")))),
       
       tabItem(tabName = "boxPlot",
               h2("Box Plot of the Selected Numeric Variable Distribution Across Groups from the Selected Categorical Variable"),
               fluidRow(
-                box(width = 8,  
+                box(width = 8, 
                     solidHeader = TRUE, collapsible = FALSE,
-                    plotOutput("dataPlot2"))))
+                    plotOutput("dataPlot2")))),
+      
+      tabItem(tabName = "scatterPlot",
+              h2("Scatter Plot of the Selected Numeric Variables"),
+              fluidRow(
+                box(width = 10,
+                    solidHeader = TRUE, collapsible = FALSE,
+                    plotOutput("dataPlot3"))))
       
       
 ))

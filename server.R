@@ -31,10 +31,17 @@ data_whole$BMI <- as.numeric(data_whole$BMI)
 
 server <- function(input, output, session) {
   
+  # change the filter slide value based on different numeric variable
+  observe({updateSliderInput(session, inputId = "filter", 
+                             min = min(select(data_whole,input$select1)),
+                             max = max(select(data_whole,input$select1)),
+                             value =c(min(select(data_whole,input$select1)), max(select(data_whole,input$select1)) ))})
   
-  #get new data based on the selected numeric variable
+  #get new data based on the selected numeric variable and filter rows
   getData <- reactive({
-    newData <- data_whole %>% select(!!sym(input$select1), Remission)
+    newData <- data_whole %>% 
+               select(!!sym(input$select1), Remission) %>%
+               filter(!!sym(input$select1) >= input$filter[1] & !!sym(input$select1) <= input$filter[2])
   })
   
   #summary table
@@ -55,12 +62,18 @@ server <- function(input, output, session) {
     }
   })
   
-  #Histogram 
+  #Distribution Plot 
   output$dataPlot <- renderPlot({
     #get new data 
     newData <- getData()
+    
+    if(input$RB2=="Histogram" & input$Bin){
     h <- ggplot(newData, aes(x = !!sym(input$select1), fill = Remission))
-    h + geom_histogram(alpha=0.5, position = 'dodge', bins = input$Bin) + labs(x = input$select1, title = paste0("Histogram of ", input$select1, " Distribution Across Remission Groups"))
+    h + geom_histogram(alpha=0.5, position = input$RB3, bins = input$Bin) + labs(x = input$select1, title = paste0("Histogram of ", input$select1, " Distribution Across Remission Groups"))
+    }else if (input$RB2=="Density"){
+    d <- ggplot(newData, aes(x = !!sym(input$select1), fill = Remission))
+    d + geom_density(alpha=0.5, position = input$RB3, adjust = input$Adjust) + labs(x = input$select1, title = paste0("Density Plot of ", input$select1, " Distribution Across Remission Groups"))
+    }
 })
   
   #get new data based on the selected categorical variable
@@ -86,6 +99,18 @@ server <- function(input, output, session) {
     newData2 <- getData2()
     x <- ggplot(newData2, aes(y = !!sym(input$select1), x = !!sym(input$select2), fill = !!sym(input$select2)))
     x + geom_boxplot(alpha=0.5, adjust = 0.5) + labs(y = input$select1, title = paste0("Box Plot of ", input$select1, " Distribution Across ", input$select2," Groups"))
+  })
+  
+  #get new data based on the selected numeric variables
+  getData3 <- reactive({
+    newData3 <- data_whole %>% select(!!sym(input$select1), !!sym(input$select3), Remission)
+  })
+  #scatter plot
+  output$dataPlot3 <- renderPlot({
+    #get new data 
+    newData3 <- getData3()
+    s <- ggplot(newData3, aes(x = !!sym(input$select1), y = !!sym(input$select3)))
+    s + geom_point(aes(col = Remission), alpha = 0.6, size = 1, position = "jitter") + labs(x = input$select1, y = input$select3, title = paste0("Scatter Plot of ", input$select1, " and ", input$select3," Across Remission Groups"))
   })
   
 }
