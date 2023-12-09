@@ -10,6 +10,7 @@ library(shinyWidgets)
 library(tidyverse)
 library(caret)
 library(ggplot2)
+library(shinyjs)
 
 # read in RA data
 data_whole <- read_csv("ra_data.csv")
@@ -30,6 +31,8 @@ data_whole$MdhaqScore <- as.numeric(data_whole$MdhaqScore)
 data_whole$BMI <- as.numeric(data_whole$BMI)
 
 server <- function(input, output, session) {
+  
+######################## EDA ###########################
   
   # change the filter slide value based on different numeric variable
   observe({updateSliderInput(session, inputId = "filter", 
@@ -113,4 +116,125 @@ server <- function(input, output, session) {
     s + geom_point(aes(col = Remission), alpha = 0.6, size = 1, position = "jitter") + labs(x = input$select1, y = input$select3, title = paste0("Scatter Plot of ", input$select1, " and ", input$select3," Across Remission Groups"))
   })
   
+######################## Modeling ###########################
+  # set a formula for logistic regression
+  output$formular <- renderUI({
+    withMathJax(
+      helpText('
+               $$\\log {(}{\\frac {p}{1-p}}{)}=\\beta _{0}+\\beta x$$'))
+  })
+  
+  #change random forest slide bar number based on how many predictors are chosen
+  observe({updateSliderInput(session, inputId = "mtry", 
+                             max = length(input$predictor),
+                             value =c(1, length(input$predictor)))})
+  
+  #fit model button setting
+  button <- eventReactive(input$fitmodel,{
+  
+  #get new data based on the selected variables
+  data_model <- select(data_whole, c(input$predictor, "Remission"))
+  
+  #split data
+  set.seed(20)
+  index <- createDataPartition(data_model$Remission, p = input$split, list = FALSE)
+  train <- data_model[index, ]
+  test <- data_model[-index, ]
+  
+  #fit logistic regression
+  log <- train(Remission ~ .,
+                    data=train, 
+                    method = "glm", 
+                    family = "binomial",
+                    preProcess = c("center", "scale")
+              )
+  #regression coefficient
+  logs <- summary(log)
+  
+  #test logistic regression on testing set
+  logt <- confusionMatrix(data=test$Remission, reference = predict(log, newdata = test))
+  
+  #fit random forest
+  rf <- train(Remission ~ .,
+                    data=train, 
+                    method = "rf", 
+                    ntree = 500,
+                    preProcess = c("center", "scale"),
+                    tuneGrid = data.frame(mtry = c(input$mtry[1]:input$mtry[2])),
+                    trControl = trainControl(method = "cv", number = input$cv),
+                    importance=TRUE
+              )
+  
+  #random forest variable importance
+  rfi <- varImp(rf, scale=TRUE)[[1]]
+  rfi$Variable <-row.names(rfi) 
+  rfi <- reshape2::melt(rfi)
+  rfi <- rename(rfi, Remission = variable)
+  
+  #test random forest on testing set
+  rft <- confusionMatrix(data=test$Remission, reference = predict(rf, newdata = test))
+  
+  #compare 2 confusion matrix and automatically return the better model
+  l <- data.frame(cbind(logt[[3]][1], model = "Logistc Regression"))
+  r <- data.frame(cbind(rft[[3]][1], model = "Random Forest"))
+  two <- rbind(l, r)
+  final <- two[which.max(as.numeric(two$V1)), ]
+  
+  #return everything 
+  list(log, logs, logt, rf, rfi, rft, final, two)
+  })
+  
+  #create logistic regression summary
+  output$logacu <- renderPrint({
+    button()[[1]]
+  })
+  
+  #regression coefficient
+  output$logsum <- renderPrint({
+    button()[[2]]
+  })
+  
+  #test logistic regression on testing set
+  output$logtest <- renderPrint({
+    button()[[3]]
+  })  
+  
+  #create random forest summary
+  output$rfacu <- renderPrint({
+    button()[[4]]
+  })
+  
+  #create random forest importance Plot
+  output$rfplot <- renderPlot({
+    i <- ggplot(button()[[5]], aes(value, Variable, col = Remission))
+    i + geom_point() + facet_wrap( ~ Remission)
+  })
+  
+  #test random forest on testing set
+  output$rftest <- renderPrint({
+    button()[[6]]
+  })  
+  
+  #compare 2 confusion matrix and automatically return the better model
+  
+  output$best <- renderText({
+    paste("After comparing both models’ accuracy on the test set, the ", 
+          button()[[7]]$model, " model has better accuracy. Thus, the ", button()[[7]]$model, " model is the better model for predicting RA remission.")
+    
+  })  
+  
+  #test
+  output$t1 <- renderPrint({
+    button()[[7]]
+  })  
+  
+  output$t2 <- renderPrint({
+    button()[[8]]
+  })  
+  
+  #set up the action button tab
+  observeEvent(input$fitmodel, {
+    updateTabItems(session, "tabs", selected = "model")
+  })
+    
 }
