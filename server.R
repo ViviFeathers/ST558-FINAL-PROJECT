@@ -116,7 +116,7 @@ server <- function(input, output, session) {
     s + geom_point(aes(col = Remission), alpha = 0.6, size = 1, position = "jitter") + labs(x = input$select1, y = input$select3, title = paste0("Scatter Plot of ", input$select1, " and ", input$select3," Across Remission Groups"))
   })
   
-######################## Modeling ###########################
+######################## Model Statistic ###########################
   # set a formula for logistic regression
   output$formular <- renderUI({
     withMathJax(
@@ -126,24 +126,29 @@ server <- function(input, output, session) {
   
   #change random forest slide bar number based on how many predictors are chosen
   observe({updateSliderInput(session, inputId = "mtry", 
-                             max = length(input$predictor),
+                             max = length(input$predictor1),
                              value =c(1, length(input$predictor)))})
   
   #fit model button setting
   button <- eventReactive(input$fitmodel,{
-  
-  #get new data based on the selected variables
-  data_model <- select(data_whole, c(input$predictor, "Remission"))
-  
+    
   #split data
   set.seed(20)
-  index <- createDataPartition(data_model$Remission, p = input$split, list = FALSE)
-  train <- data_model[index, ]
-  test <- data_model[-index, ]
+  index <- createDataPartition(data_whole$Remission, p = input$split, list = FALSE)
+  train <- data_whole[index, ]
+  test <- data_whole[-index, ]
+  
+  #get new data for logistic regression based on the selected variables
+ train1 <- select(train, c(input$predictor, "Remission"))
+ test1 <- select(test, c(input$predictor, "Remission"))
+ 
+  #get new data for random forest based on the selected variables
+ train2 <- select(train, c(input$predictor1, "Remission"))
+ test2 <- select(test, c(input$predictor1, "Remission"))
   
   #fit logistic regression
   log <- train(Remission ~ .,
-                    data=train, 
+                    data=train1, 
                     method = "glm", 
                     family = "binomial",
                     preProcess = c("center", "scale")
@@ -152,11 +157,11 @@ server <- function(input, output, session) {
   logs <- summary(log)
   
   #test logistic regression on testing set
-  logt <- confusionMatrix(data=test$Remission, reference = predict(log, newdata = test))
+  logt <- confusionMatrix(data=test1$Remission, reference = predict(log, newdata = test1))
   
   #fit random forest
   rf <- train(Remission ~ .,
-                    data=train, 
+                    data=train2, 
                     method = "rf", 
                     ntree = 500,
                     preProcess = c("center", "scale"),
@@ -172,7 +177,7 @@ server <- function(input, output, session) {
   rfi <- rename(rfi, Remission = variable)
   
   #test random forest on testing set
-  rft <- confusionMatrix(data=test$Remission, reference = predict(rf, newdata = test))
+  rft <- confusionMatrix(data=test2$Remission, reference = predict(rf, newdata = test2))
   
   #compare 2 confusion matrix and automatically return the better model
   l <- data.frame(cbind(logt[[3]][1], model = "Logistc Regression"))
@@ -223,18 +228,51 @@ server <- function(input, output, session) {
     
   })  
   
-  #test
-  output$t1 <- renderPrint({
-    button()[[7]]
-  })  
-  
-  output$t2 <- renderPrint({
-    button()[[8]]
-  })  
-  
   #set up the action button tab
   observeEvent(input$fitmodel, {
     updateTabItems(session, "tabs", selected = "model")
   })
+  
+  ######################## Model Prediction ###########################
+  
+  button1 <- eventReactive(input$predgo,{
+  #create a new data set according to the input values  
+  pred_data <- data.frame(cbind(input$Age, input$PainScale, input$FatigueScale, input$PatientGlobal, input$MDGlobal, input$MdhaqScore, input$BMI, 
+                     input$HighBloodPressure, input$Smoke, input$Bronchitis, input$Melanoma, input$Narcotic, input$PainMed, input$DmardMed))
+  colnames(pred_data)<-c("Age", "PainScale", "FatigueScale", "PatientGlobal", "MDGlobal", "MdhaqScore", "BMI",
+                         "HighBloodPressure", "Smoke", "Bronchitis", "Melanoma", "Narcotic", "PainMed", "DmardMed")
+  
+  pred_data$Age <- as.numeric(pred_data$Age)
+  pred_data$PainScale <- as.numeric(pred_data$PainScale)
+  pred_data$PatientGlobal <- as.numeric(pred_data$PatientGlobal)
+  pred_data$FatigueScale <- as.numeric(pred_data$FatigueScale)
+  pred_data$MDGlobal <- as.numeric(pred_data$MDGlobal)
+  pred_data$MdhaqScore <- as.numeric(pred_data$MdhaqScore)
+  pred_data$BMI <- as.numeric(pred_data$BMI)
+  pred_data$HighBloodPressure <- as.factor(pred_data$HighBloodPressure) 
+  pred_data$Smoke <- as.factor(pred_data$Smoke)
+  pred_data$Bronchitis <- as.factor(pred_data$Bronchitis) 
+  pred_data$Melanoma <- as.factor(pred_data$Melanoma)
+  pred_data$Narcotic <- as.factor(pred_data$Narcotic)
+  pred_data$PainMed <- as.factor(pred_data$PainMed) 
+  pred_data$DmardMed <- as.factor(pred_data$DmardMed)
+  
+  #return everything 
+  pred_data
+  })
+  
+  #output the prediction value for from both the logistic regression and random forest model
+  output$logpred <- renderTable({
+    predict(button()[[1]], newdata = button1(), type = "prob")
+  })
     
+  output$rfpred <- renderTable({
+    predict(button()[[4]], newdata = button1(), type = "prob")
+  })  
+  
+  #set up the action button tab
+  observeEvent(input$predgo, {
+    updateTabItems(session, "tabs", selected = "out")
+  })
+  
 }

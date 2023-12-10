@@ -118,10 +118,10 @@ ui <- dashboardPage(skin = "black",
             hidden(menuSubItem("Model", tabName = "model")),
             
              #prediction
-            menuSubItem("Prediction", tabName = "pred",icon = icon("play", lib = "glyphicon"))
+            menuSubItem("Prediction", tabName = "pred",icon = icon("play", lib = "glyphicon")),
             
             #prediction out
-            #hidden(menuSubItem("Prediction Output", tabName = "out"))
+            hidden(menuSubItem("Prediction Output", tabName = "out"))
            )
    )),
     
@@ -206,9 +206,6 @@ ui <- dashboardPage(skin = "black",
       #model setting
       tabItem(tabName = "modelstat",
               h3("Model Setting"),
-          checkboxGroupInput(inputId ="predictor", label = "Which Predictors do you want to include into the model?",
-                         choices = c("Age", "PainScale", "FatigueScale", "PatientGlobal", "MDGlobal", "MdhaqScore", "BMI",
-                                     "HighBloodPressure", "Smoke", "Bronchitis", "Melanoma", "Narcotic", "PainMed", "DmardMed")),
 
           sliderInput(inputId = "split",
                   label = "How big do you want the training set to be?",
@@ -216,7 +213,19 @@ ui <- dashboardPage(skin = "black",
                   max = 0.9,
                   value = 0.8,
                   step = 0.1),
-
+          
+          h4("Logistic Regression"),
+          
+          checkboxGroupInput(inputId ="predictor", label = "Which Predictors do you want to include into the Logistic Regression model?",
+                             choices = c("Age", "PainScale", "FatigueScale", "PatientGlobal", "MDGlobal", "MdhaqScore", "BMI",
+                                         "HighBloodPressure", "Smoke", "Bronchitis", "Melanoma", "Narcotic", "PainMed", "DmardMed")),
+          
+          h4("Random Forest"),
+          
+          checkboxGroupInput(inputId ="predictor1", label = "Which Predictors do you want to include into the Random Forest model?",
+                             choices = c("Age", "PainScale", "FatigueScale", "PatientGlobal", "MDGlobal", "MdhaqScore", "BMI",
+                                         "HighBloodPressure", "Smoke", "Bronchitis", "Melanoma", "Narcotic", "PainMed", "DmardMed")),
+          
           sliderInput(inputId = "mtry",
                   label = "How do you want to set the tuning parameter for random forest model?",
                   min = 1,
@@ -233,7 +242,7 @@ ui <- dashboardPage(skin = "black",
 
           actionButton("fitmodel",h5("Fit Models")),
           
-          h4("Note: It takes a while to run the models!")
+          h4("Note: It takes a while to run & rerun the models!")
       ),
       
       
@@ -281,26 +290,32 @@ ui <- dashboardPage(skin = "black",
               
               br(),
               h4("Binary Variables"),
-            
-              radioButtons("HighBloodPressure", label = "HighBloodPressure", choices = list(0,1)),
-              radioButtons("Smoke", label = "Smoke", choices = list(0,1)),
-              radioButtons("Bronchitis", label = "Bronchitis", choices = list(0,1)),
-              radioButtons("Melanoma", label = "Melanoma", choices = list(0,1)),
-              radioButtons("Narcotic", label = "Narcotic", choices = list(0,1)),
-              radioButtons("PainMed", label = "PainMed", choices = list(0,1)),
-              radioButtons("DmardMed", label = "DmardMed", choices = list(0,1)),
+                  
+              radioButtons("HighBloodPressure", label = "HighBloodPressure", choices = list(0, 1)),
+              radioButtons("Smoke", label = "Smoke", choices = list(0, 1)),
+              radioButtons("Bronchitis", label = "Bronchitis", choices = list(0, 1)),
+              radioButtons("Melanoma", label = "Melanoma", choices = list(0, 1)),
+              radioButtons("Narcotic", label = "Narcotic", choices = list(0, 1)),
+              radioButtons("PainMed", label = "PainMed", choices = list(0, 1)),
+              radioButtons("DmardMed", label = "DmardMed", choices = list(0, 1)),
               
               actionButton("predgo",h5("PREDICT")),
-             )
+              
+              h4("Note: It takes a while if re-fit models & rerun the predictions!")
+             ),
       
-      # tabItem(tabName = "out",        
-      #         h3("Probability of Remission")
+      tabItem(tabName = "out",        
+              h3("Probability of Remission"),
               
-              # fluidRow(box(title = "",  width = 10,
-              #              solidHeader = TRUE, collapsible = FALSE,
-              #              tableOutput("predication"))
-      #        )
-              
+              fluidRow(
+                box(title = "Remission Probablity Prediction From Logistic Regression",  width = 10,
+                          solidHeader = TRUE, collapsible = FALSE,
+                          tableOutput("logpred")),
+                box(title = "Remission Probablity Prediction From Random Forest",  width = 10,
+                          solidHeader = TRUE, collapsible = FALSE,
+                          tableOutput("rfpred"))
+                      )
+              )
 
 
 ))
