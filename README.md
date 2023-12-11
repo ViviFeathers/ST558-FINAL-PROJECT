@@ -16,22 +16,22 @@ Tab 3.  Modeling:  We explore modeling by fitting a logistic regression model an
         The last subtab is for remission prediction, you can manually set input values for each predictor, run the models you fit in the previous tab and return the probability of Remissions.  
 
 ## Packages 
-`shiny`
-`shinydashboard`
-`shinyWidgets`
-`tidyverse`
-`caret`
-`ggplot2`
-`shinyjs`
+`shiny`  
+`shinydashboard`  
+`shinyWidgets`  
+`tidyverse`  
+`caret`  
+`ggplot2`  
+`shinyjs`  
 
 ## Package Installing
-install.pacakge("shiny")
-install.pacakge("shinydashboard")
-install.pacakge("shinyWidgets")
-install.pacakge("tidyverse")
-install.pacakge("caret")
-install.pacakge("ggplot2")
-install.pacakge("shinyjs")
+install.pacakge("shiny")  
+install.pacakge("shinydashboard")  
+install.pacakge("shinyWidgets")  
+install.pacakge("tidyverse")  
+install.pacakge("caret")  
+install.pacakge("ggplot2")  
+install.pacakge("shinyjs")  
 
 ## Run the APP
 The code I used to run my APP from repo is as below:
