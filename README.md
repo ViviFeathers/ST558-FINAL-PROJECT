@@ -28,13 +28,13 @@ Tab 3.  Modeling:  We explore modeling by fitting a logistic regression model an
 `shinyjs`  
 
 ## Package Installing
-install.pacakge("shiny")  
-install.pacakge("shinydashboard")  
-install.pacakge("shinyWidgets")  
-install.pacakge("tidyverse")  
-install.pacakge("caret")  
-install.pacakge("ggplot2")  
-install.pacakge("shinyjs")  
+install.package("shiny")  
+install.package("shinydashboard")  
+install.package("shinyWidgets")  
+install.package("tidyverse")  
+install.package("caret")  
+install.package("ggplot2")  
+install.package("shinyjs")  
 
 ## Run the APP
 The code I used to run my APP from repo is as below:  
