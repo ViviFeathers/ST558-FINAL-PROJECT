@@ -16,7 +16,7 @@ library(shinyjs)
 
 ui <- dashboardPage(skin = "black",
   
-  dashboardHeader(title = "Rheumatoid Arthritis Disease Remission Prediction"),
+  dashboardHeader(title = "RA Remission Prediction"),
   
   ## Sidebar content
   dashboardSidebar(useShinyjs(),
@@ -130,20 +130,37 @@ ui <- dashboardPage(skin = "black",
       #About
     tabItems(
       tabItem(tabName = "About",
-              h3("Purpose: To predict Rheumatoid Arthritis(RA) remission based on patients' disease activities, RA treatments, physical condition and other diagnostic diseases."),
+              h2("Rheumatoid Arthritis(RA) Remission Prediction"),
+              h3("Purpose: To predict Rheumatoid Arthritis(RA) remission based on patients' RA disease activities, RA treatments, physical condition and other diagnostic diseases."),
+              img(src='rar.JPG',height=50,width=50),
+              h3("Data Source: The Brigham and Women’s Hospital Rheumatoid Arthritis Sequential Study"),
+              tags$a(href="https://www.brassstudy.org/", "BRASS"),
+              h4("Our data set has 1581 observations and 14 predictors, the outcome is 'Remission' with vaule 0 as no remission, and 1 means remission."),
+              h4("Foureen predictors are listed as below:"),
+              h5("Age: numeric, patient's age, from 18 to 100 by 1"),
+              h5("PainScale: numeric, pain scale, from 0 to 100 by 25"),
+              h5("FatigueScale: numeric, fatigue scale, from 0 to 100 by 25"),
+              h5("PatientGlobal: numeric, patient global score, from 0 to 100 by 25"),
+              h5("MDGlobal: numeric, global score from patient's physician, from 0 to 100 by 25"),
+              h5("MdhaqScore: numeric, MDHAQ score, from 0 to 3 by 0.1"),
+              h5("BMI: numeric, body mass index, from 10 to 60 by 0.1"),
+              h5("HighBloodPressure: binary, 1 = Have, 0 = Not have"),
+              h5("Smoke: binary, 1 = Ever smoked, 0 = Never smoked"),
+              h5("Bronchitis: binary, 1 = Have, 0 = Not have"),
+              h5("Melanoma: binary, 1 = Have, 0 = Not have"),
+              h5("Narcotic: binary, 1 = Taking, 0 = Not taking"),
+              h5("PainMed: binary, 1 = Taking, 0 = Not taking"),
+              h5("DmardMed: binary, 1 = Taking, 0 = Not taking"),
               br(),
-              h3("Data Source: Harvard Medical School Rheumatoid Arthritis Database"),
-              h4("Data consist of 1581 observations and 14 predictors. The outcome is Remission with vaule 0 as no remission, and 1 means remission."),
-              h4("14 predictors are listed as below:"),
-              h4("Age: numeric, patient's age"),
-              h4("HighBloodPressure: Binary, 1 = Yes, 0 = No"),
-              br(),
-              h3("App functions:"),
-              h4("1. Exploratory data analysis of the dataset"),
-              h4("2. Compare the performance of three models in predicting whether or not the patients in the dataset have diabetes or not."),
-              h4("3. Predict the probability of a patient have remission by user input values"),
-              h4("4. Save the data used in modeling as a csv file.")
+              h3("App Introduction:"),
+              h4("Tab 1. About:  Infromation about the data set and purpose of this APP"),
+              h4("Tab 2.Data Explorary Analysis:  we can investigate the data distribution by creating summary tables, contingency tables, histogram, density plot and bar chart  We can also learn the relationship of those predictors with each other by generating box plots and scatter plots."),
+              h4("Tab 3. Modeling:  We explore modeling by fitting a logistic regression model and a random forest model."),
+              h5("The first subtab has the introduction about these two models."),
+              h5("The second subtab is used for model setting where you can choose variables, tuning parameter and cross-validation fold number, you can also decide how to split the training and test set."),
+              h5("The last subtab is for remission prediction, you can manually set input values for each predictor, run the models you fit in the previous tab and return the probability of Remissions.")
              ),
+      
       #EDA
       tabItem(tabName = "Summary",
               h2("Summary Table of Numeric Variable"),
