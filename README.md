@@ -8,9 +8,12 @@ The data source used by this APP is from The Brigham and Women’s Hospital Rheu
 There are 3 tabs in the APP:
 
 Tab 1.  About:  Infromation about the data set and purpose of this APP.  
+
 Tab 2.  Data Explorary Analysis:  we can investigate the data distribution by creating summary tables, contingency tables, histogram, density plot and bar chart  We can also learn the relationship of those predictors with 
         each other by generating box plots and scatter plots.  
+        
 Tab 3.  Modeling:  We explore modeling by fitting a logistic regression model and a random forest model.  
+
         The first subtab has the introduction about these two models.  
         The second subtab is used for model setting where you can choose variables, tuning parameter and cross-validation fold number, you can also decide how to split the training and test set.  
         The last subtab is for remission prediction, you can manually set input values for each predictor, run the models you fit in the previous tab and return the probability of Remissions.  
