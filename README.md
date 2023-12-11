@@ -9,7 +9,7 @@ There are 3 tabs in the APP:
 
 Tab 1.  About:  Infromation about the data set and purpose of this APP.  
 
-Tab 2.  Data Explorary Analysis:  we can investigate the data distribution by creating summary tables, contingency tables, histogram, density plot and bar chart  We can also learn the relationship of those predictors with 
+Tab 2.  Data Explorary Analysis:  We investigate the data distribution by creating summary tables, contingency tables, histograms, density plots and bar charts. We also learn the relationship of those predictors with 
         each other by generating box plots and scatter plots.  
         
 Tab 3.  Modeling:  We explore modeling by fitting a logistic regression model and a random forest model.  
