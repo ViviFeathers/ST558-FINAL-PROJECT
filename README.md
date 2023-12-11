@@ -37,5 +37,5 @@ install.pacakge("ggplot2")
 install.pacakge("shinyjs")  
 
 ## Run the APP
-The code I used to run my APP from repo is as below:
+The code I used to run my APP from repo is as below:  
 `shiny::runGitHub('ST558-FINAL-PROJECT','ViviFeathers', ref="main")`
